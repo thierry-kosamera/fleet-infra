@@ -1,0 +1,64 @@
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
+  name: podinfo
+  namespace: default
+spec:
+  interval: 5m0s
+  path: ./kustomize
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: podinfo
+  targetNamespace: default
+  patches:
+    - patch: |-
+        apiVersion: v1
+        kind: Service
+        metadata:
+          name: podinfo
+        spec:
+          type: LoadBalancer
+      target:
+        name: podinfo
+        kind: Service
+    - patch: |-
+        - op: replace
+          path: /spec/template/spec/containers/0/env/0/value
+          value: "#FF0000"
+      target:
+        name: podinfo
+        kind: Deployment
+    - patch: |-
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: not-important
+        spec:
+          template:
+            spec:
+              containers:
+                - name: podinfod
+                  volumeMounts:
+                    - name: volumeofsecrets
+                      mountPath: "/etc/volumeofsecrets"
+                      readOnly: true
+                  env:
+                    - name: SOPS_SECRET
+                      valueFrom:
+                        secretKeyRef:
+                          name: samplesecretsops
+                          key: password
+                    - name: NORMAL_SECRET
+                      valueFrom:
+                        secretKeyRef:
+                          name: samplesecretplain
+                          key: postgresql-password
+              volumes:
+                - name: volumeofsecrets
+                  secret:
+                    secretName: samplesecretsops
+      target:
+        name: podinfo
+        kind: Deployment

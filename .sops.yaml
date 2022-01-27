@@ -1,0 +1,6 @@
+creation_rules:
+  - path_regex: .*.yaml
+    encrypted_regex: ^(data|stringData)$
+    pgp: ECDB8FD61791C934AAA5CB34E3DA317F7610C3BE
+    age: age1k477jx2y6s64qkw3zjvyapj2ffq27rfndr8yh6fpjl2ksyaehfkqpa9vcd
+  - age: age1k477jx2y6s64qkw3zjvyapj2ffq27rfndr8yh6fpjl2ksyaehfkqpa9vcd
