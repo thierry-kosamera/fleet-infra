@@ -1,0 +1,673 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+bases:
+  - ../base/
+  - ../ms/
+  - ../ml/
+  - ./secrets/
+resources:
+  - opensearch-securityconfig.yaml
+  - opensearch-dashboards-configmap.yaml
+generatorOptions:
+  disableNameSuffixHash: true
+configMapGenerator:
+  - name: kafka-exporter-config
+    namespace: exporter
+    files:
+      - ./config/burrow.toml
+  - name: api-config
+    namespace: packetai-system
+    literals:
+      - PORT=8080
+      - HOST=0.0.0.0
+      - ACCOUNTS_URL=http://accounts.packetai-system.svc.cluster.local
+      - ACCOUNTS_CLIENT_ID=kibana-sso
+      - ACCOUNTS_CLIENT_SECRET=522ca261-5db8-43a1-a1b4-15688f55da33
+      - DB_NAME=testdb
+      - REDIS_URL=redis-master.redis.svc.cluster.local
+      - AWS_BUCKET_NAME=packetai.ingest.dev
+      - S3_BUCKET=packetai.ingest.dev
+      - ELASTICSEARCH_URL=https://opensearch-cluster-client.opensearch.svc.cluster.local:9200
+      - KIBANA_URL=https://dashboards-gcpdev.packetai.co
+      - ACCOUNTS_REDIRECT_URI=http://api.packetai-system.svc.cluster.local/auth/packetai/callback
+      - ACCOUNTS_SCOPE=openid profile email address phone
+      - ACCOUNTS_RESPONSE_TYPE=code
+      - CLIENT_URL=https://app-gcpdev.packetai.co
+      - GOPRIVATE=gitlab.packetai.co
+      - MONGO_CLUSTER=mongo-mongodb-replicaset-0.mongo-mongodb-replicaset.mongo.svc.cluster.local:27017,mongo-mongodb-replicaset-1.mongo-mongodb-replicaset.mongo.svc.cluster.local:27017,mongo-mongodb-replicaset-2.mongo-mongodb-replicaset.mongo.svc.cluster.local:27017
+      - MONGO_SOURCE=admin
+      - MONGO_DATABASE=testdb
+      - MONGO_USER=root
+      - MONGO_PASSWORD=example
+      - MONGO_SSL=false
+      - APIDEVURL=http://api
+      - AWS_SERVICE_URL=http://awsservice.packetai-system.svc.cluster.local:4444
+      - INGEST_SERVICE_HOSTNAME=ingest-gcpdev.packetai.co
+      - ENCRYPTION_SECRET=$775gQTozffkuc&m
+      - DGRAPH_URL=http://dgraph-public.dgraph.svc.cluster.local:8080/graphql
+      - DGRAPH_HOST=http://dgraph-public.dgraph.svc.cluster.local:8080/graphql
+      - INCIDENT_MANAGER_URL=http://incident-manager.packetai-system.svc.cluster.local
+      - POSTGRES_IP=postgres-postgresql.postgres.svc.cluster.local
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=da45dmsBb9q9fDCmcGKNhNeiYKA38Q
+      - POSTGRES_DB=packetai
+      - AWS_INSTALLER_S3_PREFIX=agent-binaries
+      - AWS_INSTALLER_BUCKET_NAME=packetai.ingest.dev
+      - REGISTRATION_API_KEY=0982JL21KJ31289L213893H12
+      - X_INTERNAL_TOKEN=e68xCKhYz8hidFyc@x3#SQ6Ek5?Kq76x7paA79
+      - NEGATIVE_LOG_REPORT_ENABLED=true
+      - BECKY_URL="https://api-gcpdev.packetai.co"
+      - SHOW_EXPERIMENTAL_FEATURES=true
+      # Below configuration is for accounts
+  - name: accounts-config
+    namespace: packetai-system
+    literals:
+      - NODE_ENV=production
+      - MONGODB_URI="mongodb://root:example@mongo-mongodb-replicaset-0.mongo-mongodb-replicaset.mongo.svc.cluster.local:27017,mongo-mongodb-replicaset-1.mongo-mongodb-replicaset.mongo.svc.cluster.local:27017,mongo-mongodb-replicaset-2.mongo-mongodb-replicaset.mongo.svc.cluster.local:27017/openid?authSource=admin&replicaSet=rs0"
+      - MONGO_DBNAME="openid"
+      - ACCOUNTS_URL="https://accounts-gcpdev.packetai.co"
+      - MONGODB_SERVER=root:example@mongo-mongodb-replicaset-0.mongo-mongodb-replicaset.mongo.svc.cluster.local:27017,mongo-mongodb-replicaset-1.mongo-mongodb-replicaset.mongo.svc.cluster.local:27017,mongo-mongodb-replicaset-2.mongo-mongodb-replicaset.mongo.svc.cluster.local:27017
+      - DB_NAME="openid"
+      - PORT="3000"
+      - REDIS_URL="redis-master.redis.svc.cluster.local"
+      - OIDC_CLIENT_ID="kibana-sso"
+      - OIDC_CLIENT_SECRET="522ca261-5db8-43a1-a1b4-15688f55da33"
+      - OIDC_REDIRECT_URIS="https://api-gcpdev.packetai.co/auth/packetai/callback"
+      - OIDC_RESPONSE_TYPES="code"
+      - OIDC_MAIN_RESPONSE_TYPES="code,id_token,code id_token,id_token token,code id_token token"
+      - OIDC_MAIN_REDIRECT_URIS="https://kibana-gcpdev.packetai.co/auth/openid/login,https://kibana-gcpdev.packetai.co/app/kibana,https://kibana-gcpdev.packetai.co,https://app-gcpdev.packetai.co/,https://app-gcpdev.packetai.co/authentication/callback,https://app-gcpdev.packetai.co/authentication/silent_callback,https://api-gcpdev.packetai.co/auth/packetai/callback,https://api-gcpdev.packetai.co/menu,https://packetai.co/,https://dashboards-gcpdev.packetai.co/auth/openid/login,https://dashboards-gcpdev.packetai.co/app/kibana,https://dashboards-gcpdev.packetai.co"
+      - OIDC_POST_LOGOUT_REDIRECT_URIS="https://kibana-gcpdev.packetai.co/app/kibana,https://app-gcpdev.packetai.co,https://packetai.co/,https://dashboards-gcpdev.packetai.co/app/kibana"
+      - OIDC_SCOPE="openid profile email address phone"
+      - OPENDISTRO_URL="https://opensearch-cluster-client.opensearch.svc.cluster.local:9200"
+      - OPENDISTRO_USERNAME="admin"
+      - OPENDISTRO_PASSWORD="*nQNxB#aFtWhvYxg"
+      - API_REDIRECT_URIS="http://api.packetai-system.svc.cluster.local/auth/packetai/callback"
+      - MINIMA_URL="https://app-gcpdev.packetai.co"
+      - BECKY_URL="https://api-gcpdev.packetai.co"
+      - REGISTRATION_API_KEY=0982JL21KJ31289L213893H12
+
+  - name: frontend-config
+    namespace: packetai-system
+    literals:
+      - PUBLIC_URL=https://app-gcpdev.packetai.co
+      - REACT_APP_PUBLIC_URL=https://app-gcpdev.packetai.co
+      - REACT_APP_DEFAULT_PROTOCOL=https
+      - REACT_APP_API_DEFAULT_PROTOCOL=https
+      - REACT_APP_API_SOCKET_PROTOCOL=wss
+      - REACT_APP_DEFAULT_ENDPOINT=app-gcpdev.packetai.co
+      - REACT_APP_API_ENDPOINT=api-gcpdev.packetai.co
+      - REACT_APP_OIDC_CLIENT_ID=kibana-sso
+      - REACT_APP_OIDC_AUTHORITY=https://accounts-gcpdev.packetai.co
+      - REACT_APP_OIDC_SCOPE='openid profile email address phone'
+      - REACT_APP_OIDC_RESPONSE_TYPE='id_token token'
+      - REACT_APP_OIDC_POST_LOGOUT_REDIRECT_URI=https://packetai.co/
+      - REACT_APP_KIBANA_URL=https://dashboards-gcpdev.packetai.co
+      - REACT_APP_WEBHOOKS_ENDPOINT=https://ingest-gcpdev.packetai.co
+      - REACT_APP_INGEST_URL=https://ingest-gcpdev.packetai.co
+      - REACT_APP_BECKY_AGENT_INSTALLER=true
+  - name: kafka-config
+    namespace: packetai-system
+    literals:
+      - KAFKA_BROKERS=broker3-gcpdev.packetai.co:19092,broker3-gcpdev.packetai.co:29092,broker3-gcpdev.packetai.co:39092
+      - BROKERS=broker3-gcpdev.packetai.co:19092,broker3-gcpdev.packetai.co:29092,broker3-gcpdev.packetai.co:39092
+      - KAFKA_USE_SSL="false"
+  - name: kafka-config
+    namespace: argo-events
+    literals:
+      - KAFKA_BROKERS=broker3-gcpdev.packetai.co:19092,broker3-gcpdev.packetai.co:29092,broker3-gcpdev.packetai.co:39092
+  - name: kafka-config
+    namespace: logstash
+    literals:
+      - KAFKA_BROKERS=broker3-gcpdev.packetai.co:19092,broker3-gcpdev.packetai.co:29092,broker3-gcpdev.packetai.co:39092
+  - name: mongo-config
+    namespace: argo-events
+    literals:
+      - MONGODB_URI=mongodb://root:example@mongo-mongodb-replicaset-0.mongo-mongodb-replicaset.mongo.svc.cluster.local:27017,mongo-mongodb-replicaset-1.mongo-mongodb-replicaset.mongo.svc.cluster.local:27017,mongo-mongodb-replicaset-2.mongo-mongodb-replicaset.mongo.svc.cluster.local:27017/testdb?authSource=admin
+
+secretGenerator:
+  - name: api-secret
+    namespace: packetai-system
+    envs:
+      - api-secret.env
+  - name: kafka-secret
+    namespace: packetai-system
+    files:
+      - consumer.server.cer.pem
+      - consumer.client.key.pem
+      - consumer.client.cer.pem
+  - name: kafka-base64-secret
+    namespace: packetai-system
+    files:
+      - consumer.server.cer.pem.base64
+      - consumer.client.key.pem.base64
+      - consumer.client.cer.pem.base64
+  - name: kafka-base64-secret
+    namespace: exporter
+    files:
+      - consumer.server.cer.pem
+      - consumer.client.key.pem
+      - consumer.client.cer.pem
+  - name: opendistro-opendistro-es-kibana-config
+    namespace: od-system
+    files:
+      - kibana.yml
+  - name: od-security-config-secrets
+    namespace: od-system
+    files:
+      - config.yml
+      - action_groups.yml
+      - internal_users.yml
+      - nodes_dn.yml
+      - roles.yml
+      - roles_mapping.yml
+      - tenants.yml
+      - whitelist.yml
+  - name: aws-secrets-tls
+    namespace: kube-system
+    envs:
+      - aws-secrets-tls.env
+
+patchesJSON6902:
+  - target:
+      group: extensions
+      version: v1beta1
+      kind: Ingress
+      name: ingest
+      namespace: packetai-system
+    patch: |-
+      - op: replace
+        path: /spec/rules/0/host
+        value: ingest-gcpdev.packetai.co
+      - op: replace
+        path: /metadata/annotations/kubernetes.io~1ingress.class
+        value: nginx
+      # - op: add
+      #   path: /metadata/annotations/cloud.google.com~1load-balancer-type
+      #   value: External
+      # - op: add
+      #   path: /metadata/annotations/kubernetes.io~1ingress.global-static-ip-name
+      #   value: gcp-stage
+
+  - target:
+      group: extensions
+      version: v1beta1
+      kind: Ingress
+      name: beats-ingester
+      namespace: packetai-system
+    patch: |-
+      - op: replace
+        path: /spec/rules/0/host
+        value: beats-ingester-gcpdev.packetai.co
+      - op: replace
+        path: /metadata/annotations/kubernetes.io~1ingress.class
+        value: nginx
+      # - op: add
+      #   path: /metadata/annotations/cloud.google.com~1load-balancer-type
+      #   value: External
+      # - op: add
+      #   path: /metadata/annotations/kubernetes.io~1ingress.global-static-ip-name
+      #   value: gcp-stage
+
+  - target:
+      group: extensions
+      version: v1beta1
+      kind: Ingress
+      name: accounts
+      namespace: packetai-system
+    patch: |-
+      - op: replace
+        path: /spec/rules/0/host
+        value: accounts-gcpdev.packetai.co
+      - op: replace
+        path: /metadata/annotations/kubernetes.io~1ingress.class
+        value: nginx
+      # - op: add
+      #   path: /metadata/annotations/cloud.google.com~1load-balancer-type
+      #   value: External
+      # - op: add
+      #   path: /metadata/annotations/kubernetes.io~1ingress.global-static-ip-name
+      #   value: gcp-stage
+
+  - target:
+      group: extensions
+      version: v1beta1
+      kind: Ingress
+      name: api
+      namespace: packetai-system
+    patch: |-
+      - op: replace
+        path: /spec/rules/0/host
+        value: api-gcpdev.packetai.co
+      - op: replace
+        path: /metadata/annotations/kubernetes.io~1ingress.class
+        value: nginx
+      # - op: add
+      #   path: /metadata/annotations/cloud.google.com~1load-balancer-type
+      #   value: External
+      # - op: add
+      #   path: /metadata/annotations/kubernetes.io~1ingress.global-static-ip-name
+      #   value: gcp-stage
+
+  - target:
+      group: extensions
+      version: v1beta1
+      kind: Ingress
+      name: frontend
+      namespace: packetai-system
+    patch: |-
+      - op: replace
+        path: /spec/rules/0/host
+        value: app-gcpdev.packetai.co
+      - op: replace
+        path: /metadata/annotations/kubernetes.io~1ingress.class
+        value: nginx
+      # - op: add
+      #   path: /metadata/annotations/cloud.google.com~1load-balancer-type
+      #   value: External
+      # - op: add
+      #   path: /metadata/annotations/kubernetes.io~1ingress.global-static-ip-name
+      #   value: gcp-stage
+
+  - target:
+      group: extensions
+      version: v1beta1
+      kind: Ingress
+      name: opendistro-opendistro-es-kibana-ing
+      namespace: od-system
+    patch: |-
+      - op: replace
+        path: /spec/rules/0/host
+        value: kibana-gcpdev.packetai.co
+      - op: replace
+        path: /metadata/annotations/kubernetes.io~1ingress.class
+        value: nginx
+      # - op: add
+      #   path: /metadata/annotations/cloud.google.com~1load-balancer-type
+      #   value: External
+      # - op: add
+      #   path: /metadata/annotations/kubernetes.io~1ingress.global-static-ip-name
+      #   value: gcp-stage
+
+  - target:
+      group: apps
+      version: v1
+      kind: Deployment
+      name: accounts-deployment
+      namespace: packetai-system
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 2
+
+  - target:
+      group: apps
+      version: v1
+      kind: Deployment
+      name: aws-load-balancer-controller
+      namespace: kube-system
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/args
+        value: [--cluster-name=dev-packetai-co, --ingress-class=alb]
+
+  - target:
+      group: apps
+      version: v1
+      kind: Deployment
+      name: external-dns
+      namespace: kube-system
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/args
+        value: [--log-level=debug, --source=service, --source=ingress, --domain-filter=packetai.co, --provider=aws, --policy=upsert-only,
+          --aws-zone-type=public, --registry=txt, --txt-owner-id=dev-packetai-co]
+
+  - target:
+      group: apps
+      version: v1
+      kind: StatefulSet
+      name: opendistro-opendistro-es-data
+      namespace: od-system
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 3
+
+  - target:
+      group: apps
+      version: v1
+      kind: StatefulSet
+      name: opendistro-opendistro-es-data
+      namespace: od-system
+    patch: |-
+      - op: replace
+        path: /spec/volumeClaimTemplates/0/spec/resources/requests/storage
+        value: "100Gi"
+
+  - target:
+      group: apps
+      version: v1
+      kind: StatefulSet
+      name: opendistro-opendistro-es-master
+      namespace: od-system
+    patch: |-
+      - op: replace
+        path: /spec/volumeClaimTemplates/0/spec/resources/requests/storage
+        value: "20Gi"
+
+  - target:
+      group: apps
+      version: v1
+      kind: Deployment
+      name: accounts-deployment
+      namespace: packetai-system
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/image
+        value: 767498580550.dkr.ecr.eu-west-3.amazonaws.com/accounts:latest
+
+  - target:
+      group: apps
+      version: v1
+      kind: Deployment
+      name: api-deployment
+      namespace: packetai-system
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/image
+        value: 767498580550.dkr.ecr.eu-west-3.amazonaws.com/becky:latest
+
+  - target:
+      group: apps
+      version: v1
+      kind: Deployment
+      name: activator-deployment
+      namespace: packetai-system
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/image
+        value: 767498580550.dkr.ecr.eu-west-3.amazonaws.com/activator:latest
+
+  - target:
+      group: apps
+      version: v1
+      kind: StatefulSet
+      name: awsservice-sts
+      namespace: packetai-system
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/image
+        value: 767498580550.dkr.ecr.eu-west-3.amazonaws.com/awsservice:latest
+
+  - target:
+      group: apps
+      version: v1
+      kind: StatefulSet
+      name: lco-sts
+      namespace: packetai-system
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/image
+        value: 767498580550.dkr.ecr.eu-west-3.amazonaws.com/lco:latest
+
+  - target:
+      group: apps
+      version: v1
+      kind: Deployment
+      name: frontend-deployment
+      namespace: packetai-system
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/image
+        value: 767498580550.dkr.ecr.eu-west-3.amazonaws.com/minima-nginx:latest
+
+  - target:
+      group: apps
+      version: v1
+      kind: Deployment
+      name: incident-manager-deployment
+      namespace: packetai-system
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/image
+        value: 767498580550.dkr.ecr.eu-west-3.amazonaws.com/incident-manager:latest
+
+  - target:
+      group: apps
+      version: v1
+      kind: Deployment
+      name: ingestservice-deployment
+      namespace: packetai-system
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/image
+        value: 767498580550.dkr.ecr.eu-west-3.amazonaws.com/ingestservice:latest
+
+  - target:
+      group: apps
+      version: v1
+      kind: Deployment
+      name: processservice-deployment
+      namespace: packetai-system
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/image
+        value: 767498580550.dkr.ecr.eu-west-3.amazonaws.com/processservice:latest
+
+  - target:
+      group: apps
+      version: v1
+      kind: Deployment
+      name: topologyservice-deployment
+      namespace: packetai-system
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/image
+        value: 767498580550.dkr.ecr.eu-west-3.amazonaws.com/topologyservice:latest
+
+  - target:
+      group: apps
+      version: v1
+      kind: Deployment
+      name: topologyservice-v2-deployment
+      namespace: packetai-system
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/image
+        value: 767498580550.dkr.ecr.eu-west-3.amazonaws.com/topologyservice-v2:latest
+
+  - target:
+      group: apps
+      version: v1
+      kind: Deployment
+      name: technoservice-deployment
+      namespace: packetai-system
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/image
+        value: 767498580550.dkr.ecr.eu-west-3.amazonaws.com/technoservice:latest
+
+  - target:
+      group: batch
+      version: v1
+      kind: Job
+      name: dgraph-schema-updater
+      namespace: packetai-system
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/image
+        value: 767498580550.dkr.ecr.eu-west-3.amazonaws.com/dgraph-schema-updater:latest
+
+  #opensearch kustomization
+  - target:
+      group: networking.k8s.io
+      version: v1beta1
+      kind: Ingress
+      name: dashboards-opensearch-dashboards
+      namespace: opensearch
+    patch: |-
+      - op: replace
+        path: /spec/rules/0/host
+        value: dashboards-gcpdev.packetai.co
+
+  - target:
+      group: apps
+      version: v1
+      kind: Deployment
+      name: dashboards-opensearch-dashboards
+      namespace: opensearch
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 1
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/cpu
+        value: "1"
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/memory
+        value: "2Gi"
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/cpu
+        value: "2"
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/memory
+        value: "4Gi"
+
+  - target:
+      group: apps
+      version: v1
+      kind: StatefulSet
+      name: opensearch-cluster-master
+      namespace: opensearch
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 1
+      - op: replace
+        path: /spec/volumeClaimTemplates/0/spec/resources/requests/storage
+        value: "8Gi"
+      - op: replace
+        path: /spec/template/spec/containers/0/env/5/value
+        value: "-Xmx4G -Xms4G"
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/cpu
+        value: "1"
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/memory
+        value: "4Gi"
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/cpu
+        value: "2"
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/memory
+        value: "8Gi"
+
+  - target:
+      group: apps
+      version: v1
+      kind: StatefulSet
+      name: opensearch-cluster-data
+      namespace: opensearch
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 2
+      - op: replace
+        path: /spec/volumeClaimTemplates/0/spec/resources/requests/storage
+        value: "500Gi"
+      - op: replace
+        path: /spec/template/spec/containers/0/env/4/value
+        value: "-Xmx6G -Xms6G"
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/cpu
+        value: "2"
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/memory
+        value: "4Gi"
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/cpu
+        value: "4"
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/memory
+        value: "8Gi"
+
+  - target:
+      group: apps
+      version: v1
+      kind: StatefulSet
+      name: opensearch-cluster-client
+      namespace: opensearch
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 1
+      - op: replace
+        path: /spec/volumeClaimTemplates/0/spec/resources/requests/storage
+        value: "8Gi"
+      - op: replace
+        path: /spec/template/spec/containers/0/env/4/value
+        value: "-Xmx4G -Xms4G"
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/cpu
+        value: "2"
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/memory
+        value: "4Gi"
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/cpu
+        value: "4"
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/memory
+        value: "8Gi"
+
+  # kafka operator kustimization
+  - target:
+      group: kafka.strimzi.io
+      version: v1beta2
+      kind: Kafka
+      name: packetai
+      namespace: kafka
+    patch: |-
+      - op: replace
+        path: /spec/kafka/listeners/1/configuration/bootstrap/annotations/external-dns.alpha.kubernetes.io~1hostname
+        value: kafka-bootstrap-gcpdev.packetai.co.
+      - op: replace
+        path: /spec/kafka/listeners/1/configuration/bootstrap/alternativeNames/0
+        value: kafka-bootstrap-gcpdev.packetai.co.
+      - op: replace
+        path: /spec/kafka/listeners/1/configuration/brokers/0/annotations/external-dns.alpha.kubernetes.io~1hostname
+        value: broker1-gcpdev.packetai.co.
+      - op: replace
+        path: /spec/kafka/listeners/1/configuration/brokers/0/advertisedHost
+        value: broker1-gcpdev.packetai.co.
+      - op: replace
+        path: /spec/kafka/listeners/1/configuration/brokers/1/annotations/external-dns.alpha.kubernetes.io~1hostname
+        value: broker2-gcpdev.packetai.co.
+      - op: replace
+        path: /spec/kafka/listeners/1/configuration/brokers/1/advertisedHost
+        value: broker2-gcpdev.packetai.co.
+      - op: replace
+        path: /spec/kafka/listeners/1/configuration/brokers/2/annotations/external-dns.alpha.kubernetes.io~1hostname
+        value: broker3-gcpdev.packetai.co.
+      - op: replace
+        path: /spec/kafka/listeners/1/configuration/brokers/2/advertisedHost
+        value: broker3-gcpdev.packetai.co.
+      - op: replace
+        path: /spec/kafka/storage/volumes/0/size
+        value: 500Gi
+
+  # logstash configuration
+  - target:
+      group: apps
+      version: v1
+      kind: Deployment
+      name: logstash-fb
+      namespace: logstash
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/2/args/3
+        value: 61af40d4d639300012970d44
+      - op: replace
+        path: /spec/template/spec/containers/2/env/1/value
+        value: e68xCKhYz8hidFyc@x3#SQ6Ek5?Kq76x7paA79
