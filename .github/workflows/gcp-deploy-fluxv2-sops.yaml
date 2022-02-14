@@ -1,0 +1,109 @@
+name: gcp-deploy-fluxv2-sops
+
+on:
+  workflow_dispatch:
+    inputs:
+      git_branch:
+        description: Git branch for updating tags
+        required: true
+        default: sops_gke-dev
+      git_path:
+        description: Git folder path
+        required: true
+        default: sops-cluster
+      project:
+        description: "GCP Project"
+        required: true
+        default: "packetai"
+      cluster_name:
+        description: "Cluster name"
+        required: true
+        default: "sops"
+      gcp_credentials:
+        description: "GCP Credentials"
+        required: false
+      google_location:
+        description: "Google GKE cluster location(could be same as region or can be zonal"
+        required: true
+        default: europe-west3-c
+
+env:
+  GIT_BRANCH: ${{ github.event.inputs.git_branch }}
+  GIT_PATH: "${{github.event.inputs.git_path}}"
+  S3_BUCKET_BACKEND: "packetai-automation-terraform-state"
+  GOOGLE_PROJECT: "${{ github.event.inputs.project }}"
+  GOOGLE_REGION: "${{ github.event.inputs.google_region }}"
+  GOOGLE_LOCATION: "${{ github.event.inputs.google_location }}"
+  GOOGLE_APPLICATION_CREDENTIALS: "${{ github.workspace }}/credentials.json"
+  GOOGLE_APPLICATION_CREDENTIALS_CONTENT: ${{ github.event.inputs.gcp_credentials == '' && secrets.GOOGLE_APPLICATION_CREDENTIALS_CONTENT || github.event.inputs.gcp_credentials }}
+  CLUSTER_NAME: "${{ github.event.inputs.cluster_name }}"
+
+jobs:
+  deploy-fluxcd:
+    name: deploy-flux
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: "${{ github.event.inputs.git_branch }}"
+      - run: "git branch --show-current"
+      - run: "ls -al"
+      # - run: 'echo "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_CONTENT }}" > $GOOGLE_APPLICATION_CREDENTIALS'
+      # - run: 'cat $GOOGLE_APPLICATION_CREDENTIALS'
+
+      # - name: Set up Cloud SDK
+      #   uses: google-github-actions/setup-gcloud@master
+      #   with:
+      #     project_id: "${{ env.GOOGLE_PROJECT }}"
+      #     service_account_key: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_CONTENT }}
+
+      # - name: Use gcloud CLI
+      #   run: |-
+      #     gcloud info;
+      #     gcloud container clusters get-credentials ${{ env.CLUSTER_NAME }} --region ${{ env.GOOGLE_LOCATION }} --project ${{ env.GOOGLE_PROJECT }};
+
+      # - id: auth
+      #   uses: google-github-actions/auth@v0.4.0
+      #   with:
+      #     credentials_json: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_CONTENT }}
+
+      # - id: get-credentials
+      #   uses: google-github-actions/get-gke-credentials@v0.3.0
+      #   with:
+      #     cluster_name: "${{ env.CLUSTER_NAME}}"
+      #     location: "${{ env.GOOGLE_LOCATION}}"
+      #     project_id: "${{ env.GOOGLE_PROJECT}}"
+      #     credentials: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_CONTENT }}
+
+      # - id: install
+      #   uses: azure/setup-kubectl@v1
+
+      # - id: create-ns
+      #   run: |
+      #     kubectl create ns flux  --dry-run=client -o yaml | kubectl apply -f -
+      #     kubectl create ns argo --dry-run=client -o yaml | kubectl apply -f -
+      #     kubectl create ns argo-events --dry-run=client -o yaml | kubectl apply -f -
+      #     kubectl create ns kafka --dry-run=client -o yaml | kubectl apply -f -
+      #     kubectl create ns logstash --dry-run=client -o yaml | kubectl apply -f -
+      #     kubectl create ns mongo --dry-run=client -o yaml | kubectl apply -f -
+      #     kubectl create ns od --dry-run=client -o yaml | kubectl apply -f -
+      #     kubectl create ns od-system --dry-run=client -o yaml | kubectl apply -f -
+      #     kubectl create ns packetai-system --dry-run=client -o yaml | kubectl apply -f -
+      #     kubectl create ns redis --dry-run=client -o yaml | kubectl apply -f -
+
+      # - id: apply-image-pullsecrets
+      #   run: |
+      #     kubectl apply -k base/image-pull-secrets;
+      #     sleep 60;
+
+      # - name: nginx-ingress
+      #   uses: WyriHaximus/github-action-helm3@v2
+      #   with:
+      #     exec: helm upgrade -i nginx-ingress ingress-nginx --wait --namespace=kube-system --set controller.extraArgs.default-ssl-certificate="kube-system/packetai-tls" --set controller.config.proxy-body-size=500m --set controller.admissionWebhooks.enabled=false --set controller.service.externalTrafficPolicy=Local --repo https://kubernetes.github.io/ingress-nginx
+
+      # - name: Fluxcd
+      #   run: |
+      #     fluxcd/kustomization.yaml.sh;
+      #     cat fluxcd/patch-kustomize.yaml;
+      #     kubectl create ns flux --dry-run=client -o yaml | kubectl apply -f - ;
+      #     kubectl apply -k fluxcd/ ;
